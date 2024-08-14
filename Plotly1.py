@@ -21,7 +21,7 @@ def ping(host):
 def monitor_hosts(hosts):
     global results
     while True:
-        for host in hosts:
+        for host in hosts:          
             success = ping(host)
             if host in results:
                 results[host].append(success)
@@ -39,14 +39,13 @@ app.layout = html.Div([
         dcc.Input(id='input-hosts', type='text', value=""),
         html.Button(id='submit-button', n_clicks=0, children='Iniciar Monitoramento')
     ]),
-    html.Div(id='graphs-container'),
+     html.Div(id='graphs-container'),
     dcc.Interval(
         id='interval-component',
         interval=1*1000,  # A cada 1 segundo ?
         n_intervals=0
     )
 ])
-
 @app.callback(
     Output('graphs-container', 'children'),
     [Input('submit-button', 'n_clicks')],
