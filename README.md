@@ -23,6 +23,13 @@ Para executar a plataforma, é necessário instalar as seguintes bibliotecas Pyt
      pip install plotly
      ```
 
+2. **MatPLotLib**:
+   - O Matplotlib é uma biblioteca para criação de gráficos e visualizações de dados em geral.
+   - Instale o MatPLotLib utilizando o seguinte comando:
+     ```bash
+     pip install matplotlib
+     ```
+
 ## Execução
 
 Após a instalação das bibliotecas, é só executar e monitorar os servidores de sua escolha.
