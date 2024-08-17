@@ -78,25 +78,25 @@ controls = [
         ]
     ),
 ]
+# @app.callback(
+#     [Output('graphs-container', 'children'), Output('output-div', 'children')],
+#     [Input('submit-button', 'n_clicks')],
+#     [dash.dependencies.State('ips', 'value')],
+#     prevent_initial_call=True
+# )
 
-@app.callback(
-    [Output('graphs-container', 'children'), Output('output-div', 'children')],
-    [Input('submit-button', 'n_clicks')],
-    [dash.dependencies.State('ips', 'value')],
-    prevent_initial_call=True
-)
-def update_output(n_clicks, value):
-    if n_clicks is None:
-        return ""
-    # Usando regex para extrair todos os IPs
-    input_hosts = re.findall(r'\d+\.\d+\.\d+\.\d+', value)
+# def update_output(n_clicks, value):
+#     if n_clicks is None:
+#         return ""
+#     # Usando regex para extrair todos os IPs
+#     input_hosts = re.findall(r'\d+\.\d+\.\d+\.\d+', value)
 
-    for host in input_hosts:
-        if host not in hosts:
-            hosts.append(host)  # Adiciona o IP à lista de hosts
-            results[host] = []  # Inicializa a entrada no dicionário de resultados
-    graphs_layout = generate_graphs_layout(results)
-    return graphs_layout, f"IP's on check: {', '.join(input_hosts)}"
+#     for host in input_hosts:
+#         if host not in hosts:
+#             hosts.append(host)  # Adiciona o IP à lista de hosts
+#             results[host] = []  # Inicializa a entrada no dicionário de resultados
+#     graphs_layout = generate_graphs_layout(results)
+#     return graphs_layout, f"IP's on check: {', '.join(input_hosts)}"
 
 
 # Função para converter IP em um ID válido (substituir '.' por '-')
@@ -133,25 +133,57 @@ app.layout = dbc.Container(
         dbc.Card(dbc.Row([dbc.Col(c) for c in controls]), body=True),
 
        html.Div(id='graphs-container'),  # Container onde os gráficos serão gerados
-       dcc.Interval(id='interval', interval=5000, n_intervals=0)  # Intervalo para atualização dos gráficos
+       dcc.Interval(id='interval', interval=1000, n_intervals=0)  # Intervalo para atualização dos gráficos
     ])
 
-# Callback para atualizar os dados dos gráficos
 @app.callback(
-    [Output(f'ip-graph-{convert_ip_to_id(host)}', 'figure') for host in results.keys()],
-    [Input('interval', 'n_intervals')]
-)
-def update_graph_data(n_intervals):
-    if not results:
+    Output('graphs-container', 'children'),
+    [Input('submit-button', 'n_clicks'), Input('interval', 'n_intervals')],
+    [State('ips', 'value')])
+
+def update_graph_data(n_clicks, n_intervals, value):
+    if n_clicks is None and n_intervals is None:
         return []
+
+  # Usando regex para extrair todos os IPs
+    if value:
+        input_hosts = re.findall(r'\d+\.\d+\.\d+\.\d+', value)
+
+        for host in input_hosts:
+            if host not in hosts:
+                hosts.append(host)  # Adiciona o IP à lista de hosts
+                results[host] = []  # Inicializa a entrada no dicionário de resultados
+
     figures = []
     for host in results.keys():
-        # Criar o gráfico para cada host com base nos dados de 'results'
-        figures.append(go.Figure(
-            data=[go.Scatter(x=list(range(len(results[host]))), y=results[host], mode='lines+markers')],
-            layout=go.Layout(title=f"Ping Times for IP: {host}", xaxis_title="Ping Attempt", yaxis_title="Time (ms)")
-        ))
-    return figures
+        if results[host]:  # Garante que há dados para o host
+            figures.append(
+                dbc.Col(
+                    dcc.Graph(
+                        id=f'ip-graph-{convert_ip_to_id(host)}',
+                        figure=go.Figure(
+                            data=[go.Scatter(x=list(range(len(results[host]))), y=results[host], mode='lines+markers')],
+                            layout=go.Layout(
+                                title={
+                                    'text': f"Host: {host}",
+                                    'font': {'size': 24},
+                                    'x': 0.5,  
+                                    'xanchor': 'center'
+                                },
+                                xaxis={
+                                    'title': {'text': 'Ping Attempt'},
+                                    'showticklabels': False # Remove os números do eixo x
+                                }, 
+                                yaxis_title="Time(ms)"
+                                )
+                        )
+                    ),
+                    width=6
+                )
+            )
+
+    return dbc.Row(figures)
+
 
 
 if __name__ == "__main__":
