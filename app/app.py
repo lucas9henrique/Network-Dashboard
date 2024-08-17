@@ -157,6 +157,26 @@ def update_graph_data(n_clicks, n_intervals, value):
     figures = []
     for host in results.keys():
         if results[host]:  # Garante que há dados para o host
+            ping_data = [0 if val is None else val for val in results[host]]
+            shapes = []
+            
+            # Adiciona uma linha vermelha em y=0 para cada valor de ping que é 0
+            for i, value in enumerate(ping_data):
+                if value == 0:
+                    shapes.append({
+                        'type': 'line',
+                        'x0': i - 0.5,
+                        'x1': i + 0.5,
+                        'y0': 0,
+                        'y1': 0,
+                        'line': {
+                            'color': 'red',
+                            'width': 2
+                        }
+                        })
+            
+            x_range = [max(0, len(ping_data) - 25), len(ping_data) - 1]
+            
             figures.append(
                 dbc.Col(
                     dcc.Graph(
@@ -172,9 +192,11 @@ def update_graph_data(n_clicks, n_intervals, value):
                                 },
                                 xaxis={
                                     'title': {'text': 'Ping Attempt'},
-                                    'showticklabels': False # Remove os números do eixo x
+                                    'range': x_range,
+                                    'showticklabels': False
                                 }, 
-                                yaxis_title="Time(ms)"
+                                yaxis_title="Time(ms)",
+                                shapes=shapes 
                                 )
                         )
                     ),
