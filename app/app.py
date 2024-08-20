@@ -110,7 +110,7 @@ def generate_graphs_layout(results):
                 dbc.Col(dbc.Card(dcc.Graph(id=f'ip-graph-{convert_ip_to_id(hosts[i])}')), width=6),
                 dbc.Col(dbc.Card(dcc.Graph(id=f'ip-graph-{convert_ip_to_id(hosts[i+1])}')), width=6) if i+1 < num_hosts else dbc.Col()
             ],
-            className="g-0",
+            className="g-0", 
         )
         rows.append(row)
     
@@ -214,7 +214,8 @@ def update_graphs(n_clicks, n_intervals, close_clicks, value, is_open, current_m
                             )
                         )
                     ),
-                    width=6
+                    width=6,
+                    style={"margin-bottom": "20px"}
                 )
             )
 
